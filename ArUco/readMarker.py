@@ -25,7 +25,7 @@ cam_rgb.video.link(xout.input)
 
 # Define the ArUco dictionary and parameters
 aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
-aruco_params = cv2.aruco.DetectorParameters()
+aruco_params = cv2.aruco.DetectorParameters_create()
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
