@@ -49,6 +49,7 @@ with dai.Device(pipeline) as device:
         frame_data = video.get()
         #previewFrame = preview.get()
         frame = frame_data.getCvFrame()
+        print(frame.shape)
 
         # Detect ArUco markers
         corners, ids, _ = cv2.aruco.detectMarkers(frame, aruco_dict, parameters=aruco_params)
@@ -64,7 +65,7 @@ with dai.Device(pipeline) as device:
 
         # Display the frame
         # Get BGR frame from NV12 encoded video frame to show with opencv
-        if time.time() - start_time > 0.1:
+        if time.time() - cv_time > 0.1:
             cv2.imshow("OAK-1 ArUco Detection", frame)
             cv_time = time.time()
         # Show 'preview' frame as is (already in correct format, no copy is made)
