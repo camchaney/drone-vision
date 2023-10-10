@@ -22,7 +22,7 @@ xout.setStreamName("video")
 # Preview
 # xout_preview = pipeline.create(dai.node.XLinkOut)
 # xout_preview.setStreamName("preview")
-cam_rgb.preview.link(xout_preview.input)
+cam_rgb.preview.link(xout.input)
 
 # Define the ArUco dictionary and parameters
 # aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
