@@ -25,14 +25,20 @@ cam_rgb.video.link(xout.input)
 # video_queue = device.getOutputQueue(name="video", maxSize=8, blocking=False)
 
 # Define the ArUco dictionary and parameters
-aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
+# aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
+aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_100)
 aruco_params = cv2.aruco.DetectorParameters_create()
+aruco_params.minMarkerPerimeterRate = 0.05  # Minimum marker size as a fraction of image width
+aruco_params.maxMarkerPerimeterRate = 0.50  # Maximum marker size as a fraction of image width
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
 
     video = device.getOutputQueue('video')
     # preview = device.getOutputQueue('preview')
+
+    # Initialize cv display timer
+    cv_time = time.time()
 
     while True:
         start_time = time.time()
@@ -45,13 +51,20 @@ with dai.Device(pipeline) as device:
         # Detect ArUco markers
         corners, ids, _ = cv2.aruco.detectMarkers(frame, aruco_dict, parameters=aruco_params)
 
+        # Filter out markers that aren't ID 0
+        if ids is not None:
+            valid_indices = [i for i, id_ in enumerate(ids) if id_ == 0]
+            ids = ids[valid_indices]
+            corners = [corners[i] for i in valid_indices]
+
         # Draw the detected markers on the frame
         cv2.aruco.drawDetectedMarkers(frame, corners, ids)
 
         # Display the frame
-        #cv2.imshow("OAK-1 ArUco Detection", frame)
         # Get BGR frame from NV12 encoded video frame to show with opencv
-        cv2.imshow("video", frame)
+        if time.time() - start_time > 0.1:
+            cv2.imshow("OAK-1 ArUco Detection", frame)
+            cv_time = time.time()
         # Show 'preview' frame as is (already in correct format, no copy is made)
         #cv2.imshow("preview", previewFrame.getFrame())
 
