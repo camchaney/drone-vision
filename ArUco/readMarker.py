@@ -11,6 +11,8 @@ cam_rgb = pipeline.createColorCamera()
 # cam_rgb.setBoardSocket(dai.CameraBoardSocket.RGB)
 cam_rgb.setBoardSocket(dai.CameraBoardSocket.CAM_A)
 cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+cam_rgb.setIspScale(10,10)
+cam_rgb.setFps(30)
 
 # Create an XLink output node for the video stream
 xout = pipeline.createXLinkOut()
