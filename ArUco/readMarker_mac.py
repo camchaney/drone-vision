@@ -1,6 +1,7 @@
 import depthai as dai
 import cv2
 import numpy as np
+import time
 
 # Initialize the OAK-1 pipeline
 pipeline = dai.Pipeline()
@@ -25,7 +26,7 @@ cam_rgb.video.link(xout.input)
 
 # Define the ArUco dictionary and parameters
 aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
-aruco_params = cv2.aruco.DetectorParameters()
+aruco_params = cv2.aruco.DetectorParameters_create()
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
@@ -34,6 +35,8 @@ with dai.Device(pipeline) as device:
     # preview = device.getOutputQueue('preview')
 
     while True:
+        start_time = time.time()
+
         # Get a frame from the OAK-1 camera
         frame_data = video.get()
         #previewFrame = preview.get()
@@ -51,6 +54,9 @@ with dai.Device(pipeline) as device:
         cv2.imshow("video", frame)
         # Show 'preview' frame as is (already in correct format, no copy is made)
         #cv2.imshow("preview", previewFrame.getFrame())
+
+        process_time = time.time() - start_time
+        print(process_time)
 
         if cv2.waitKey(1) == 27:  # Exit when 'ESC' is pressed
             break
