@@ -71,7 +71,7 @@ def camera_to_uav(x_cam, y_cam):
     y_uav = x_cam
     return(x_uav, y_uav)
     
-def  (x_uav, y_uav, yaw_rad):
+def uav_to_ne(x_uav, y_uav, yaw_rad):
     c       = math.cos(yaw_rad)
     s       = math.sin(yaw_rad)
     
