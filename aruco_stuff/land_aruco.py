@@ -16,14 +16,14 @@ modprobe bcm2835-v4l2
 
 """
 from os import sys, path
-sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+#sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
 import time
 import math
 import argparse
 
 
-# from dronekit import connect, VehicleMode, LocationGlobalRelative, Command, LocationGlobal
+from dronekit import connect, VehicleMode, LocationGlobalRelative, Command, LocationGlobal
 from pymavlink import mavutil
 from opencv.lib_aruco_pose import *
 
@@ -71,7 +71,7 @@ def camera_to_uav(x_cam, y_cam):
     y_uav = x_cam
     return(x_uav, y_uav)
     
-def uav_to_ne(x_uav, y_uav, yaw_rad):
+def  (x_uav, y_uav, yaw_rad):
     c       = math.cos(yaw_rad)
     s       = math.sin(yaw_rad)
     
@@ -99,7 +99,7 @@ deg_2_rad   = 1.0/rad_2_deg
 #-------------- LANDING MARKER  
 #--------------------------------------------------    
 #--- Define Tag
-id_to_find      = 72
+id_to_find      = 0
 marker_size     = 10 #- [cm]
 freq_send       = 1 #- Hz
 
@@ -111,12 +111,13 @@ land_speed_cms      = 30.0
 
 #--- Get the camera calibration path
 # Find full directory path of this script, used for loading config and other files
-cwd                 = path.dirname(path.abspath(__file__))
-calib_path          = cwd+"/../opencv/"
-camera_matrix       = np.loadtxt(calib_path+'cameraMatrix_raspi.txt', delimiter=',')
-camera_distortion   = np.loadtxt(calib_path+'cameraDistortion_raspi.txt', delimiter=',')                                      
-aruco_tracker       = ArucoSingleTracker(id_to_find=id_to_find, marker_size=marker_size, show_video=False, 
-                camera_matrix=camera_matrix, camera_distortion=camera_distortion)
+# Camera properties
+with open("../calibration/oak-1_cal.json", "r") as file:
+    calib_data = json.load(file)
+    camera_matrix = np.array(calib_data['cameraData'][0][1]['intrinsicMatrix'])
+    dist_coeffs = np.array(calib_data['cameraData'][0][1]['distortionCoeff'])                                   
+aruco_tracker = ArucoSingleTracker(id_to_find=id_to_find, marker_size=marker_size, show_video=False, 
+                camera_matrix=camera_matrix, camera_distortion=dist_coeffs)
                 
                 
 time_0 = time.time()
