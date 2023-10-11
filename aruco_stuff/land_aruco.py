@@ -28,7 +28,7 @@ from pymavlink import mavutil
 import cv2
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--connect', default = '')
+parser.add_argument('--connect', default = '/dev/serial0')
 args = parser.parse_args()
     
 #--------------------------------------------------
