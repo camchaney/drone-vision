@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 import time
 from pymavlink import mavutil
+import json
 
 # Initialization ---------------------------------------------------------------
 # Initialize MAVLink connection
@@ -32,10 +33,10 @@ aruco_params = cv2.aruco.DetectorParameters_create()
 
 # Constants --------------------------------------------------------------------
 # Camera properties
-with open("/mnt/data/oak-1_cal.json", "r") as file:
+with open("../calibration/oak-1_cal.json", "r") as file:
     calib_data = json.load(file)
-    camera_matrix = np.array(calib_data['intrinsic_matrix'])
-    dist_coeffs = np.array(calib_data['distortion_coeffs'])
+    camera_matrix = np.array(calib_data['cameraData'][0][1]['intrinsicMatrix'])
+    dist_coeffs = np.array(calib_data['cameraData'][0][1]['distortionCoeff'])
 
 # Variables --------------------------------------------------------------------
 
@@ -71,8 +72,8 @@ with dai.Device(pipeline) as device:
 
             # Draw marker details
             cv2.aruco.drawDetectedMarkers(frame, corners, ids)		# draw markers
-			rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(corners, 0.1, camera_matrix, dist_coeffs)
-			for i in range(len(ids)):
+            rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(corners, 0.1, camera_matrix, dist_coeffs)
+            for i in range(len(ids)):
                 cv2.drawFrameAxes(frame, camera_matrix, dist_coeffs, rvecs[i], tvecs[i], 0.05)
             cv2.line(frame, tuple(map(int, frame_center)), tuple(map(int, marker_center)), (0, 255, 0), 2)
 
