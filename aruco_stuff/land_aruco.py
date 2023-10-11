@@ -116,18 +116,28 @@ with open("../calibration/oak-1_cal.json", "r") as file:
     calib_data = json.load(file)
     camera_matrix = np.array(calib_data['cameraData'][0][1]['intrinsicMatrix'])
     dist_coeffs = np.array(calib_data['cameraData'][0][1]['distortionCoeff'])                                   
-aruco_tracker = ArucoSingleTracker(id_to_find=id_to_find, marker_size=marker_size, show_video=False, 
-                camera_matrix=camera_matrix, camera_distortion=dist_coeffs)
+# aruco_tracker = ArucoSingleTracker(id_to_find=id_to_find, marker_size=marker_size, show_video=False, 
+#                 camera_matrix=camera_matrix, camera_distortion=dist_coeffs)
+# Aruco Initialization
+# aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
+aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_100)
+aruco_params = cv2.aruco.DetectorParameters_create()
                 
                 
 time_0 = time.time()
 
 while True:                
 
-    marker_found, x_cm, y_cm, z_cm = aruco_tracker.track(loop=False)
-    if marker_found:
-        x_cm, y_cm          = camera_to_uav(x_cm, y_cm)
-        uav_location        = vehicle.location.global_relative_frame
+    # marker_found, x_cm, y_cm, z_cm = aruco_tracker.track(loop=False)
+    # Detect ArUco markers
+    corners, ids, _ = cv2.aruco.detectMarkers(frame, aruco_dict, parameters=aruco_params)
+    # if marker_found:
+    if ids is not None and 0 in ids:
+        marker_center = np.mean(corners[0][0], axis=0)
+        frame_center = [frame.shape[1] // 2, frame.shape[0] // 2]
+        #offset = marker_center - frame_center
+        x_cm, y_cm = camera_to_uav(marker_center[0], markercenter[1])
+        uav_location = vehicle.location.global_relative_frame
         
         #-- If high altitude, use baro rather than visual
         if uav_location.alt >= 5.0:
@@ -144,22 +154,22 @@ while True:
             print("Altitude = %.0fcm"%z_cm)
             print("Marker found x = %5.0f cm  y = %5.0f cm -> angle_x = %5f  angle_y = %5f"%(x_cm, y_cm, angle_x*rad_2_deg, angle_y*rad_2_deg))
             
-            north, east             = uav_to_ne(x_cm, y_cm, vehicle.attitude.yaw)
+            north, east = uav_to_ne(x_cm, y_cm, vehicle.attitude.yaw)
             print("Marker N = %5.0f cm   E = %5.0f cm   Yaw = %.0f deg"%(north, east, vehicle.attitude.yaw*rad_2_deg))
             
-            marker_lat, marker_lon  = get_location_metres(uav_location, north*0.01, east*0.01)  
+            marker_lat, marker_lon = get_location_metres(uav_location, north*0.01, east*0.01)  
             #-- If angle is good, descend
             if check_angle_descend(angle_x, angle_y, angle_descend):
                 print("Low error: descending")
-                location_marker         = LocationGlobalRelative(marker_lat, marker_lon, uav_location.alt-(land_speed_cms*0.01/freq_send))
+                location_marker = LocationGlobalRelative(marker_lat, marker_lon, uav_location.alt-(land_speed_cms*0.01/freq_send))
             else:
-                location_marker         = LocationGlobalRelative(marker_lat, marker_lon, uav_location.alt)
+                location_marker = LocationGlobalRelative(marker_lat, marker_lon, uav_location.alt)
                 
             vehicle.simple_goto(location_marker)
             print("UAV Location    Lat = %.7f  Lon = %.7f"%(uav_location.lat, uav_location.lon))
             print("Commanding to   Lat = %.7f  Lon = %.7f"%(location_marker.lat, location_marker.lon))
             
-        #--- COmmand to land
+        #--- Command to land
         if z_cm <= land_alt_cm:
             if vehicle.mode == "GUIDED":
                 print(" -->>COMMANDING TO LAND<<")
