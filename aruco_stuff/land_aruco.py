@@ -15,8 +15,8 @@ modprobe bcm2835-v4l2
 
 
 """
-from os import sys, path
-#sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+# from os import sys, path
+# sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
 import time
 import math
@@ -25,7 +25,7 @@ import argparse
 
 from dronekit import connect, VehicleMode, LocationGlobalRelative, Command, LocationGlobal
 from pymavlink import mavutil
-from opencv.lib_aruco_pose import *
+import cv2
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--connect', default = '')

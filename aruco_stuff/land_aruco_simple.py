@@ -75,7 +75,7 @@ with dai.Device(pipeline) as device:
             rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(corners, 0.1, camera_matrix, dist_coeffs)
             for i in range(len(ids)):
                 cv2.drawFrameAxes(frame, camera_matrix, dist_coeffs, rvecs[i], tvecs[i], 0.05)
-            cv2.line(frame, tuple(map(int, frame_center)), tuple(map(int, marker_center)), (0, 255, 0), 2)
+            cv2.line(frame, tuple(map(int, frame_center)), tuple(map(int, marker_center)), (128, 0, 128), 2)
 
             # TODO: Convert offset to drone movement commands and send via MAVLink
             # For example:
