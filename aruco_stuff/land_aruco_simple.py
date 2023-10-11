@@ -30,7 +30,16 @@ cam_rgb.preview.link(xout.input)		# preview
 aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_100)
 aruco_params = cv2.aruco.DetectorParameters_create()
 
+# Constants --------------------------------------------------------------------
+# Camera properties
+with open("/mnt/data/oak-1_cal.json", "r") as file:
+    calib_data = json.load(file)
+    camera_matrix = np.array(calib_data['intrinsic_matrix'])
+    dist_coeffs = np.array(calib_data['distortion_coeffs'])
+
 # Variables --------------------------------------------------------------------
+
+
 # Variables for drone control
 last_seen = time.time()		# time since last aruco detection
 HOVER_TIME = 2  # Time in seconds to hover if marker isn't seen
@@ -53,7 +62,6 @@ with dai.Device(pipeline) as device:
 
         # Detect ArUco markers
         corners, ids, _ = cv2.aruco.detectMarkers(frame, aruco_dict, parameters=aruco_params)
-        cv2.aruco.drawDetectedMarkers(frame, corners, ids)		# draw markers
 
         if ids is not None and 0 in ids:		# for aruco tag id=0
             last_seen = time.time()
@@ -61,7 +69,11 @@ with dai.Device(pipeline) as device:
             frame_center = [frame.shape[1] // 2, frame.shape[0] // 2]
             offset = marker_center - frame_center
 
-            # Draw offset line
+            # Draw marker details
+            cv2.aruco.drawDetectedMarkers(frame, corners, ids)		# draw markers
+			rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(corners, 0.1, camera_matrix, dist_coeffs)
+			for i in range(len(ids)):
+                cv2.drawFrameAxes(frame, camera_matrix, dist_coeffs, rvecs[i], tvecs[i], 0.05)
             cv2.line(frame, tuple(map(int, frame_center)), tuple(map(int, marker_center)), (0, 255, 0), 2)
 
             # TODO: Convert offset to drone movement commands and send via MAVLink

@@ -1,0 +1,92 @@
+{
+    "batchName": "",
+    "batchTime": 0,
+    "boardConf": "",
+    "boardCustom": "",
+    "boardName": "OAK-1",
+    "boardOptions": 0,
+    "boardRev": "R3M1E2",
+    "cameraData": [
+        [
+            0,
+            {
+                "cameraType": 0,
+                "distortionCoeff": [
+                    1.3246146440505981,
+                    39.40957260131836,
+                    -2.6672561943996698e-05,
+                    -0.0029891806188970804,
+                    183.59078979492188,
+                    1.1130841970443726,
+                    39.240421295166016,
+                    186.2252655029297,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "extrinsics": {
+                    "rotationMatrix": [],
+                    "specTranslation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "toCameraSocket": -1,
+                    "translation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                },
+                "height": 2160,
+                "intrinsicMatrix": [
+                    [
+                        2910.3505859375,
+                        0.0,
+                        1899.827392578125
+                    ],
+                    [
+                        0.0,
+                        2924.8935546875,
+                        1108.2349853515625
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "lensPosition": 135,
+                "specHfovDeg": 68.7938003540039,
+                "width": 3840
+            }
+        ]
+    ],
+    "hardwareConf": "",
+    "imuExtrinsics": {
+        "rotationMatrix": [],
+        "specTranslation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "toCameraSocket": -1,
+        "translation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        }
+    },
+    "miscellaneousData": [],
+    "productName": "",
+    "stereoRectificationData": {
+        "leftCameraSocket": -1,
+        "rectifiedRotationLeft": [],
+        "rectifiedRotationRight": [],
+        "rightCameraSocket": -1
+    },
+    "version": 7
+}
