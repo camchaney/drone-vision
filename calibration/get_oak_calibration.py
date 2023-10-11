@@ -1,19 +1,17 @@
-# List calibration values
 import depthai as dai
 
-# Create device and pipeline
+# Initialize device
 device = dai.Device()
-pipeline = dai.Pipeline()
 
-# Create the color camera node
-cam_rgb = pipeline.createColorCamera()
+# Fetch the EEPROM calibration data
+eeprom = device.readCalibration()
 
-# Fetch the intrinsic calibration parameters
-intrinsics = cam_rgb.getIntrinsics()
+# Get the intrinsic calibration parameters for the RGB camera
+intrinsics_rgb = eeprom.getCameraIntrinsics(dai.CameraBoardSocket.RGB)
 
 # Print the calibration parameters
-print("Camera Matrix:\n", intrinsics.cameraMatrix)
-print("Distortion Coefficients:\n", intrinsics.distCoeffs)
+print("Camera Matrix:\n", intrinsics_rgb.cameraMatrix)
+print("Distortion Coefficients:\n", intrinsics_rgb.distCoeffs)
 
 # Clean up
 device.close()
