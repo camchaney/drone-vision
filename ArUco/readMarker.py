@@ -28,8 +28,8 @@ cam_rgb.preview.link(xout.input)
 # aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
 aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_100)
 aruco_params = cv2.aruco.DetectorParameters_create()
-aruco_params.minMarkerPerimeterRate = 0.05  # Minimum marker size as a fraction of image width
-aruco_params.maxMarkerPerimeterRate = 0.50  # Maximum marker size as a fraction of image width
+# aruco_params.minMarkerPerimeterRate = 0.05  # Minimum marker size as a fraction of image width
+# aruco_params.maxMarkerPerimeterRate = 0.50  # Maximum marker size as a fraction of image width
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
@@ -52,10 +52,10 @@ with dai.Device(pipeline) as device:
         corners, ids, _ = cv2.aruco.detectMarkers(frame, aruco_dict, parameters=aruco_params)
 
         # Filter out markers that aren't ID 0
-        if ids is not None:
-            valid_indices = [i for i, id_ in enumerate(ids) if id_ == 0]
-            ids = ids[valid_indices]
-            corners = [corners[i] for i in valid_indices]
+        #if ids is not None:
+        #    valid_indices = [i for i, id_ in enumerate(ids) if id_ == 0]
+        #    ids = ids[valid_indices]
+        #    corners = [corners[i] for i in valid_indices]
 
         # Draw the detected markers on the frame
         cv2.aruco.drawDetectedMarkers(frame, corners, ids)
@@ -70,7 +70,7 @@ with dai.Device(pipeline) as device:
         #cv2.imshow("preview", previewFrame.getFrame())
 
         process_time = time.time() - start_time
-        print(process_time)
+        print(1/process_time)
 
         if cv2.waitKey(1) == 27:  # Exit when 'ESC' is pressed
             break
