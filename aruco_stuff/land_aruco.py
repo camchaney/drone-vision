@@ -21,6 +21,7 @@ modprobe bcm2835-v4l2
 import depthai as dai
 import time
 import math
+import numpy as np
 import argparse
 from dronekit import connect, VehicleMode, LocationGlobalRelative, Command, LocationGlobal
 from pymavlink import mavutil
