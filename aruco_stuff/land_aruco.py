@@ -124,6 +124,7 @@ land_alt_cm         = 50.0
 angle_descend       = 20*deg_2_rad
 land_speed_cms      = 30.0
 
+z_cm = land_alt_cm * 2      # initializing value
 
 
 #--- Get the camera calibration path
