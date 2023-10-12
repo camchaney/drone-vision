@@ -29,6 +29,7 @@ import cv2
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--connect', default = '/dev/serial0')
+parser.add_argument('--baud', default = '921600')
 args = parser.parse_args()
     
 #--------------------------------------------------
@@ -87,7 +88,7 @@ def check_angle_descend(angle_x, angle_y, angle_desc):
 #--------------------------------------------------    
 #-- Connect to the vehicle
 print('Connecting...')
-vehicle = connect(args.connect)  
+vehicle = connect(args.connect,baud=args.baud,wait_ready=True)  
 
 #--------------------------------------------------
 #-------------- PARAMETERS  
