@@ -139,12 +139,14 @@ with open("../calibration/oak-1_cal.json", "r") as file:
 # aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
 aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_100)
 aruco_params = cv2.aruco.DetectorParameters_create()
+print("ArUco tag definitions created")
                 
                 
 time_0 = time.time()
 
 with dai.Device(pipeline) as device:
     video = device.getOutputQueue(name="video", maxSize=8, blocking=False)
+    print("Video stream started")
 
     while True:
         # Get a frame from the OAK-1 camera
