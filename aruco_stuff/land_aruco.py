@@ -18,15 +18,16 @@ modprobe bcm2835-v4l2
 # from os import sys, path
 # sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
+import depthai as dai
 import time
 import math
 import argparse
-
-
 from dronekit import connect, VehicleMode, LocationGlobalRelative, Command, LocationGlobal
 from pymavlink import mavutil
 import cv2
+import json
 
+# Argument Parsing
 parser = argparse.ArgumentParser()
 parser.add_argument('--connect', default = '/dev/serial0')
 parser.add_argument('--baud', default = '921600')
@@ -86,9 +87,23 @@ def check_angle_descend(angle_x, angle_y, angle_desc):
 #--------------------------------------------------
 #-------------- CONNECTION  
 #--------------------------------------------------    
-#-- Connect to the vehicle
+# Connect to the vehicle
 print('Connecting...')
 vehicle = connect(args.connect,baud=args.baud,wait_ready=True)  
+
+# OAK Initialization
+pipeline = dai.Pipeline()
+
+cam_rgb = pipeline.createColorCamera()
+# cam_rgb.setBoardSocket(dai.CameraBoardSocket.RGB)
+cam_rgb.setBoardSocket(dai.CameraBoardSocket.CAM_A)
+cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+cam_rgb.setIspScale(10,10)
+cam_rgb.setFps(30)
+
+xout = pipeline.createXLinkOut()        # create output node for video stream
+xout.setStreamName("video")
+cam_rgb.preview.link(xout.input)        # preview
 
 #--------------------------------------------------
 #-------------- PARAMETERS  
@@ -127,52 +142,61 @@ aruco_params = cv2.aruco.DetectorParameters_create()
                 
 time_0 = time.time()
 
-while True:                
+with dai.Device(pipeline) as device:
+    video = device.getOutputQueue(name="video", maxSize=8, blocking=False)
 
-    # marker_found, x_cm, y_cm, z_cm = aruco_tracker.track(loop=False)
-    # Detect ArUco markers
-    corners, ids, _ = cv2.aruco.detectMarkers(frame, aruco_dict, parameters=aruco_params)
-    # if marker_found:
-    if ids is not None and 0 in ids:
-        marker_center = np.mean(corners[0][0], axis=0)
-        frame_center = [frame.shape[1] // 2, frame.shape[0] // 2]
-        #offset = marker_center - frame_center
-        x_cm, y_cm = camera_to_uav(marker_center[0], markercenter[1])
-        uav_location = vehicle.location.global_relative_frame
-        
-        #-- If high altitude, use baro rather than visual
-        if uav_location.alt >= 5.0:
-            print 
-            z_cm = uav_location.alt*100.0
-            
-        angle_x, angle_y    = marker_position_to_angle(x_cm, y_cm, z_cm)
+    while True:
+        # Get a frame from the OAK-1 camera
+        frame_data = video.get()
+        frame = frame_data.getCvFrame()            
 
-        
-        if time.time() >= time_0 + 1.0/freq_send:
-            time_0 = time.time()
-            # print ""
-            print( " ")
-            print("Altitude = %.0fcm"%z_cm)
-            print("Marker found x = %5.0f cm  y = %5.0f cm -> angle_x = %5f  angle_y = %5f"%(x_cm, y_cm, angle_x*rad_2_deg, angle_y*rad_2_deg))
+        # marker_found, x_cm, y_cm, z_cm = aruco_tracker.track(loop=False)
+        # Detect ArUco markers
+        corners, ids, _ = cv2.aruco.detectMarkers(frame, aruco_dict, parameters=aruco_params)
+        # if marker_found:
+        if ids is not None and 0 in ids:
+            marker_center = np.mean(corners[0][0], axis=0)
+            frame_center = [frame.shape[1] // 2, frame.shape[0] // 2]
+            #offset = marker_center - frame_center
+            x_cm, y_cm = camera_to_uav(marker_center[0], markercenter[1])
+            uav_location = vehicle.location.global_relative_frame
             
-            north, east = uav_to_ne(x_cm, y_cm, vehicle.attitude.yaw)
-            print("Marker N = %5.0f cm   E = %5.0f cm   Yaw = %.0f deg"%(north, east, vehicle.attitude.yaw*rad_2_deg))
-            
-            marker_lat, marker_lon = get_location_metres(uav_location, north*0.01, east*0.01)  
-            #-- If angle is good, descend
-            if check_angle_descend(angle_x, angle_y, angle_descend):
-                print("Low error: descending")
-                location_marker = LocationGlobalRelative(marker_lat, marker_lon, uav_location.alt-(land_speed_cms*0.01/freq_send))
-            else:
-                location_marker = LocationGlobalRelative(marker_lat, marker_lon, uav_location.alt)
+            #-- If high altitude, use baro rather than visual
+            if uav_location.alt >= 5.0:
+                print 
+                z_cm = uav_location.alt*100.0
                 
-            vehicle.simple_goto(location_marker)
-            print("UAV Location    Lat = %.7f  Lon = %.7f"%(uav_location.lat, uav_location.lon))
-            print("Commanding to   Lat = %.7f  Lon = %.7f"%(location_marker.lat, location_marker.lon))
+            angle_x, angle_y    = marker_position_to_angle(x_cm, y_cm, z_cm)
+
             
-        #--- Command to land
-        if z_cm <= land_alt_cm:
-            if vehicle.mode == "GUIDED":
-                print(" -->>COMMANDING TO LAND<<")
-                vehicle.mode = "LAND"
-            
+            if time.time() >= time_0 + 1.0/freq_send:
+                time_0 = time.time()
+                # print ""
+                print( " ")
+                print("Altitude = %.0fcm"%z_cm)
+                print("Marker found x = %5.0f cm  y = %5.0f cm -> angle_x = %5f  angle_y = %5f"%(x_cm, y_cm, angle_x*rad_2_deg, angle_y*rad_2_deg))
+                
+                north, east = uav_to_ne(x_cm, y_cm, vehicle.attitude.yaw)
+                print("Marker N = %5.0f cm   E = %5.0f cm   Yaw = %.0f deg"%(north, east, vehicle.attitude.yaw*rad_2_deg))
+                
+                marker_lat, marker_lon = get_location_metres(uav_location, north*0.01, east*0.01)  
+                #-- If angle is good, descend
+                if check_angle_descend(angle_x, angle_y, angle_descend):
+                    print("Low error: descending")
+                    location_marker = LocationGlobalRelative(marker_lat, marker_lon, uav_location.alt-(land_speed_cms*0.01/freq_send))
+                else:
+                    location_marker = LocationGlobalRelative(marker_lat, marker_lon, uav_location.alt)
+                    
+                vehicle.simple_goto(location_marker)
+                print("UAV Location    Lat = %.7f  Lon = %.7f"%(uav_location.lat, uav_location.lon))
+                print("Commanding to   Lat = %.7f  Lon = %.7f"%(location_marker.lat, location_marker.lon))
+                
+            #--- Command to land
+            if z_cm <= land_alt_cm:
+                if vehicle.mode == "GUIDED":
+                    print(" -->>COMMANDING TO LAND<<")
+                    vehicle.mode = "LAND"
+
+            if cv2.waitKey(1) == 27:  # Exit when 'ESC' is pressed
+                break
+
