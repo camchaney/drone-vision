@@ -55,7 +55,7 @@ def get_location_metres(original_location, dNorth, dEast):
     dLat = dNorth/earth_radius
     dLon = dEast/(earth_radius*math.cos(math.pi*original_location.lat/180))
     
-    print(f"{dlat}, {dlon}", dLat, dLon)
+    print(f"{dLat}, {dLon}", dLat, dLon)
 
     #New position in decimal degrees
     newlat = original_location.lat + (dLat * 180/math.pi)
