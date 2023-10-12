@@ -162,7 +162,7 @@ with dai.Device(pipeline) as device:
             marker_center = np.mean(corners[0][0], axis=0)
             frame_center = [frame.shape[1] // 2, frame.shape[0] // 2]
             #offset = marker_center - frame_center
-            x_cm, y_cm = camera_to_uav(marker_center[0], markercenter[1])
+            x_cm, y_cm = camera_to_uav(marker_center[0], marker_center[1])
             uav_location = vehicle.location.global_relative_frame
             
             #-- If high altitude, use baro rather than visual
