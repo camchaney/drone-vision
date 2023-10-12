@@ -193,13 +193,15 @@ with dai.Device(pipeline) as device:
                 vehicle.simple_goto(location_marker)
                 print("UAV Location    Lat = %.7f  Lon = %.7f"%(uav_location.lat, uav_location.lon))
                 print("Commanding to   Lat = %.7f  Lon = %.7f"%(location_marker.lat, location_marker.lon))
-                
-            #--- Command to land
-            if z_cm <= land_alt_cm:
-                if vehicle.mode == "GUIDED":
-                    print(" -->>COMMANDING TO LAND<<")
-                    vehicle.mode = "LAND"
+        
+        cv2.imshow("video", frame)
 
-            if cv2.waitKey(1) == 27:  # Exit when 'ESC' is pressed
-                break
+        #--- Command to land
+        if z_cm <= land_alt_cm:
+            if vehicle.mode == "GUIDED":
+                print(" -->>COMMANDING TO LAND<<")
+                vehicle.mode = "LAND"
+
+        if cv2.waitKey(1) == 27:  # Exit when 'ESC' is pressed
+            break
 
